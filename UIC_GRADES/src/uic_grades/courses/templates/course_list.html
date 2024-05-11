@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+        }
+        #plot {
+            width: 100%;
+            height: calc(100% - 30px);  /* Adjust the height based on the select element's height */
+        }
+    </style>
+</head>
+<body>
+    <select id="gen-ed-filter">
+        <option value="All">All</option>
+        <option value="Analyzing the Natural World">Analyzing the Natural World</option>
+        <option value="Exploring World Cultures">Exploring World Cultures</option>
+        <option value="Understanding the Creative Arts">Understanding the Creative Arts</option>
+        <option value="Understanding the Individual and Society">Understanding the Individual and Society</option>
+        <option value="Understanding the Past">Understanding the Past</option>
+        <option value="Understanding U.S. Society">Understanding U.S. Society</option>
+    </select>
+
+    <div id="plot"></div>
+
+    <script>
+        function updatePlot(data) {
+            var trace = {
+                x: data.perc_as,
+                y: data.avg_gpas,
+                text: data.courses,
+                mode: 'markers',
+                marker: {
+                    size: data.total_students,
+                    sizemode: 'area',
+                    sizeref: 2 * Math.max(...data.total_students) / (40 ** 2),
+                    sizemin: 4,
+                    color: data.perc_as,
+                    colorscale: 'Viridis',
+                    showscale: true
+                },
+                hovertemplate: '%{text}<br>Average GPA: %{y:.2f}<br>Percentage of As: %{x:.2f}%<br>Total Students: %{marker.size}<extra></extra>',
+                hoverinfo: 'text'
+            };
+
+            var layout = {
+                title: 'Course Performance',
+                xaxis: {
+                    title: 'Percentage of As',
+                    hovermode: false
+                },
+                yaxis: {
+                    title: 'Average GPA',
+                    hovermode: false
+                },
+                autosize: true,
+                margin: { t: 30, b: 30, l: 30, r: 30 },
+                hovermode: 'closest'
+            };
+
+            var config = {
+                responsive: true
+            };
+
+            Plotly.newPlot('plot', [trace], layout, config);
+        }
+
+        function resizePlot() {
+            var update = {
+                width: document.getElementById('plot').offsetWidth,
+                height: document.getElementById('plot').offsetHeight
+            };
+            Plotly.relayout('plot', update);
+        }
+
+        $(document).ready(function() {
+            $('#gen-ed-filter').change(function() {
+                var genEdReq = $(this).val();
+                var url = '/filter_courses/?gen_ed_req=' + encodeURIComponent(genEdReq);
+
+                $.getJSON(url, function(data) {
+                    updatePlot(data);
+                });
+            });
+
+            // Initial plot with all courses
+            $.getJSON('/filter_courses/?gen_ed_req=All', function(data) {
+                updatePlot(data);
+            });
+
+            // Resize plot on window resize
+            window.addEventListener('resize', resizePlot);
+        });
+    </script>
+</body>
+</html>
