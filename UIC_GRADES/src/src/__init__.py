@@ -11,7 +11,7 @@ with open(filename, 'r') as file:
     for row in csv_reader:
         data.append(row)
 
-# Calculate the average GPA and percentage of As for each course
+# Calculate the average GPA and percentage of As for each course 
 courses = []
 avg_gpas = []
 perc_as = []
