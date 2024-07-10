@@ -11,7 +11,7 @@ plotly = "^5.22.0"
 pandas = "^2.2.2"
 flask = "^3.0.3"
 flask-cors = "^4.0.1"
-django = "^5.0.6"
+django = "^5.0.7"
 
 
 [build-system]
